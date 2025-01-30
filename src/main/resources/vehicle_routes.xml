@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<vehicles>
+    <vehicle id="1">
+        <route>[0, 1]</route>
+        <cargo large_boxes="1" medium_boxes="3" small_boxes="4"/>
+    </vehicle>
+    <vehicle id="2">
+        <route>[2, 16]</route>
+        <cargo large_boxes="2" medium_boxes="0" small_boxes="1"/>
+    </vehicle>
+    <vehicle id="3">
+        <route>[5, 12]</route>
+        <cargo large_boxes="5" medium_boxes="4" small_boxes="3"/>
+    </vehicle>
+    <vehicle id="4">
+        <route>[9, 11]</route>
+        <cargo large_boxes="3" medium_boxes="2" small_boxes="0"/>
+    </vehicle>
+    <vehicle id="5">
+        <route>[15, 17]</route>
+        <cargo large_boxes="3" medium_boxes="0" small_boxes="5"/>
+    </vehicle>
+</vehicles>
