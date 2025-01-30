@@ -2,22 +2,18 @@
 <vehicles>
     <vehicle id="1">
         <route>[0, 1]</route>
-        <cargo large_boxes="1" medium_boxes="3" small_boxes="4"/>
+        <cargo large_boxes="0" medium_boxes="0" small_boxes="1"/>
     </vehicle>
     <vehicle id="2">
-        <route>[2, 16]</route>
-        <cargo large_boxes="2" medium_boxes="0" small_boxes="1"/>
+        <route>[4, 9]</route>
+        <cargo large_boxes="0" medium_boxes="4" small_boxes="4"/>
     </vehicle>
     <vehicle id="3">
-        <route>[5, 12]</route>
-        <cargo large_boxes="5" medium_boxes="4" small_boxes="3"/>
+        <route>[7, 9]</route>
+        <cargo large_boxes="4" medium_boxes="2" small_boxes="1"/>
     </vehicle>
     <vehicle id="4">
-        <route>[9, 11]</route>
-        <cargo large_boxes="3" medium_boxes="2" small_boxes="0"/>
-    </vehicle>
-    <vehicle id="5">
-        <route>[15, 17]</route>
-        <cargo large_boxes="3" medium_boxes="0" small_boxes="5"/>
+        <route>[12, 14]</route>
+        <cargo large_boxes="2" medium_boxes="2" small_boxes="3"/>
     </vehicle>
 </vehicles>
