@@ -29,8 +29,6 @@ public class Main {
         Route.generateRoutes("src/main/resources/cluster_coordinates.csv", "src/main/resources/routes.csv");
 
 
-
-
         System.out.println("Step 4: Assigning cargo to clusters...");
         Route.assignCargoToClusters("src/main/resources/input_data.csv", "src/main/resources/assigned_cargo.csv");
 
