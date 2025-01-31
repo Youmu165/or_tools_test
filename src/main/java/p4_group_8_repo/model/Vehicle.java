@@ -8,6 +8,7 @@ public class Vehicle
     private double height;
     private int maxWeight;
     private int price;
+    private double maxVolume;
 
     public Vehicle(String type, double length, double width, double height, int maxWeight, int price) {
         this.type = type;
@@ -16,6 +17,7 @@ public class Vehicle
         this.height = height;
         this.maxWeight = maxWeight;
         this.price = price;
+        this.maxVolume = length * width * height;
     }
 
     public String getType() { return type; }
@@ -24,4 +26,5 @@ public class Vehicle
     public double getHeight() { return height; }
     public int getMaxWeight() { return maxWeight; }
     public int getPrice() { return price; }
+    public double getMaxVolume() { return maxVolume; }
 }

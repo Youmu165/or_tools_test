@@ -1,113 +1,51 @@
 package p4_group_8_repo.controller;
 
-
 import p4_group_8_repo.model.Vehicle;
 import p4_group_8_repo.utils.Constants;
 import p4_group_8_repo.utils.csvUtil;
-import p4_group_8_repo.utils.xmlGenerator;
 
 import java.util.*;
 
-public class Packing
-{
-    public static void assignVehicles(String routesCSV, String cargoCSV, String vehicleCSV, String vehicleXML) {
+public class Packing {
+
+    private static double computeDistance(double lat1, double lon1, double lat2, double lon2) {
+        return Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lon2 - lon1, 2));
+    }
+
+    public static void assignVehicles(String routesCSV, String clusterCSV, String vehicleCSV) {
         List<String[]> routesData = csvUtil.readCSV(routesCSV);
-        List<String[]> cargoData = csvUtil.readCSV(cargoCSV);
-        if (routesData.isEmpty() || cargoData.isEmpty()) {
-            System.err.println("ERROR: Missing data for vehicle assignment.");
+        List<String[]> clusterData = csvUtil.readCSV(clusterCSV);
+
+        if (routesData.isEmpty() || clusterData.isEmpty()) {
+            System.err.println("ERROR: Missing route or cluster data.");
             return;
         }
 
-        Map<Integer, int[]> clusterCargo = new HashMap<>();
-        for (int i = 1; i < cargoData.size(); i++) {
-            int clusterId = Integer.parseInt(cargoData.get(i)[0]);
-            int large = Integer.parseInt(cargoData.get(i)[1]);
-            int medium = Integer.parseInt(cargoData.get(i)[2]);
-            int small = Integer.parseInt(cargoData.get(i)[3]);
-
-            clusterCargo.put(clusterId, new int[]{large, medium, small});
-        }
-
-
         List<String[]> assignedVehicles = new ArrayList<>();
-        assignedVehicles.add(new String[]{"vehicle_id", "large_boxes", "medium_boxes", "small_boxes"});
+        assignedVehicles.add(new String[]{"route_id", "vehicle_id", "route", "vehicle_type"});
 
-        List<Map<String, Object>> vehicleRoutes = new ArrayList<>();
-        int vehicleId = 1;
-        Map<Integer, List<Integer>> vehicleLoads = new HashMap<>();
-
+        int vehicleId = 101;
 
         for (int i = 1; i < routesData.size(); i++) {
-            int fromCluster = Integer.parseInt(routesData.get(i)[0]);
-            int toCluster = Integer.parseInt(routesData.get(i)[1]);
+            int routeId = Integer.parseInt(routesData.get(i)[0]);
+            String[] clusters = routesData.get(i)[1].split("->");
 
-            if (!clusterCargo.containsKey(fromCluster)) continue;
-            int[] cargo = clusterCargo.get(fromCluster);
-
-
-            boolean assigned = false;
-            for (Map.Entry<Integer, List<Integer>> entry : vehicleLoads.entrySet()) {
-                int existingVehicleId = entry.getKey();
-                List<Integer> assignedClusters = entry.getValue();
-
-                int totalLarge = cargo[0], totalMedium = cargo[1], totalSmall = cargo[2];
-                for (int cluster : assignedClusters) {
-                    if (clusterCargo.containsKey(cluster)) {
-                        int[] existingCargo = clusterCargo.get(cluster);
-                        totalLarge += existingCargo[0];
-                        totalMedium += existingCargo[1];
-                        totalSmall += existingCargo[2];
-                    }
-                }
-
-                int totalWeight = totalLarge * Constants.LARGE_BOX_WT +
-                        totalMedium * Constants.MEDIUM_BOX_WT +
-                        totalSmall * Constants.SMALL_BOX_WT;
-
-                for (Vehicle v : Constants.VEHICLE_TYPES) {
-                    if (totalWeight <= v.getMaxWeight()) {
-                        assignedClusters.add(fromCluster);
-                        assigned = true;
-                        break;
-                    }
-                }
-
-                if (assigned) break;
+            double totalDistance = 0;
+            for (int j = 0; j < clusters.length - 1; j++) {
+                int fromCluster = Integer.parseInt(clusters[j]);
+                int toCluster = Integer.parseInt(clusters[j + 1]);
+                totalDistance += computeDistance(fromCluster, toCluster, fromCluster + 1, toCluster + 1);
             }
 
-
-            if (!assigned) {
-                for (Vehicle v : Constants.VEHICLE_TYPES) {
-                    int totalWeight = cargo[0] * Constants.LARGE_BOX_WT +
-                            cargo[1] * Constants.MEDIUM_BOX_WT +
-                            cargo[2] * Constants.SMALL_BOX_WT;
-
-                    if (totalWeight <= v.getMaxWeight()) {
-                        assignedVehicles.add(new String[]{String.valueOf(vehicleId), String.valueOf(cargo[0]), String.valueOf(cargo[1]), String.valueOf(cargo[2])});
-
-
-                        List<Integer> newVehicleClusters = new ArrayList<>();
-                        newVehicleClusters.add(fromCluster);
-                        vehicleLoads.put(vehicleId, newVehicleClusters);
-
-
-                        Map<String, Object> vehicleInfo = new HashMap<>();
-                        vehicleInfo.put("vehicle_id", vehicleId);
-                        vehicleInfo.put("route", Arrays.asList(fromCluster, toCluster));
-                        vehicleInfo.put("cargo", cargo);
-                        vehicleRoutes.add(vehicleInfo);
-
-                        vehicleId++;
-                        break;
-                    }
-                }
+            if (totalDistance > Constants.MAX_DISTANCE) {
+                vehicleId++;
             }
+
+            Vehicle selectedVehicle = Constants.VEHICLE_TYPES.get(0);
+            assignedVehicles.add(new String[]{String.valueOf(routeId), String.valueOf(vehicleId), routesData.get(i)[1], selectedVehicle.getType()});
         }
 
         csvUtil.writeCSV(vehicleCSV, assignedVehicles);
         System.out.println("Vehicles assigned and saved in " + vehicleCSV);
-
-
-        xmlGenerator.generateVehicleXML(vehicleXML, vehicleRoutes);
     }
 }

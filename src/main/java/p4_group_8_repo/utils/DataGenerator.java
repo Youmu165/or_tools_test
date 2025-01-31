@@ -77,7 +77,7 @@ public class DataGenerator
         //start the writer
         try (BufferedWriter writer =  new BufferedWriter(new FileWriter(OUTPUT_CSV)))
         {
-            writer.write("latitude,longitude,large,medium,small\\n");
+            writer.write("latitude,longitude,large,medium,small\n");
             for (double[] location : Locations)
             {
                 //generate the number of boxes in each location

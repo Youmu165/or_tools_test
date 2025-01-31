@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<vehicles>
-    <vehicle id="1">
-        <route>[0, 3]</route>
-        <cargo large_boxes="0" medium_boxes="5" small_boxes="4"/>
-    </vehicle>
-</vehicles>
