@@ -1,6 +1,6 @@
-route_id,vehicle_id,route,vehicle_type
-1,101,0->4->10->2->11,Small Van
-2,101,8->3->1->17->12,Small Van
-3,101,7->16->15->5->6,Small Van
-4,101,14->19->18->13->9,Small Van
-5,101,0,Small Van
+vehicle_id,route_ids,routes,vehicle_type
+1,1,0->15->16->19->18,Small Van
+2,2,17->13->3->7->14,Small Van
+3,3,10->1->11->4->5,Small Van
+4,4,12->6->2->8->9,Small Van
+5,5,0,Small Van
