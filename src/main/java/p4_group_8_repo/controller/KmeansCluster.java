@@ -8,50 +8,52 @@ import java.util.*;
 
 public class KmeansCluster {
 
-    /**
-     * Perform K-means++ clustering on coordinate data.
-     *
-     * @param coordinates The coordinates that will be transformed into clusters.
-     * @param numClusters The number of clusters.
-     * @return The result of clustering, each cluster contains several ClusterableLocation.
-     */
-    public static List<CentroidCluster<ClusterableLocation>> performClustering(List<double[]> coordinates, int numClusters) {
-        // Use K-means++ to create clusters, with a maximum of 100 optimization iterations.
-        KMeansPlusPlusClusterer<ClusterableLocation> clusterer = new KMeansPlusPlusClusterer<>(numClusters, 100);
-        List<ClusterableLocation> clusterInput = new ArrayList<>();
 
-        // Convert coordinates into ClusterableLocation instances.
-        for (double[] coord : coordinates) {
-            clusterInput.add(new ClusterableLocation(coord));
-        }
+    public static List<CentroidCluster<ClusterableLocation>> performClustering(List<ClusterableLocation> clusterableLocations, int numClusters) {
+            KMeansPlusPlusClusterer<ClusterableLocation> clusterer =
+                    new KMeansPlusPlusClusterer<>(numClusters, 100); // 最大迭代100次
 
-        // Perform clustering and return results.
-        return clusterer.cluster(clusterInput);
+            return clusterer.cluster(clusterableLocations);
     }
 
     /**
      * ClusterableLocation represents a data point for K-means++ clustering.
      */
     static class ClusterableLocation implements Clusterable {
-        private final double[] points;
+        private final double[] point;
 
-        /**
-         * Constructor for a clusterable location.
-         *
-         * @param points The coordinate points (latitude, longitude).
-         */
-        public ClusterableLocation(double[] points) {
-            this.points = points;
+        //private final double[] point;
+        private final int large;
+        private final int medium;
+        private final int small;
+
+        public ClusterableLocation(double lat, double lon, int large, int medium, int small) {
+            this.point = new double[]{lat, lon};
+            this.large = large;
+            this.medium = medium;
+            this.small = small;
         }
 
         @Override
         public double[] getPoint() {
-            return points;
+            return point;
+        }
+
+        public int getLarge() {
+            return large;
+        }
+
+        public int getMedium() {
+            return medium;
+        }
+
+        public int getSmall() {
+            return small;
         }
     }
 
     /**
-     * Reads data from a CSV file, performs clustering, and saves the results along with cargo information.
+     * Reads data from a CSV file, performs clustering, and saves the results and cargo information.
      *
      * @param inputCSV  Path to the input CSV file containing coordinates.
      * @param outputCSV Path to the output CSV file where clustered data will be stored.
@@ -61,16 +63,23 @@ public class KmeansCluster {
         // Read coordinates from the CSV file.
         List<String[]> rawData = csvUtil.readCSV(inputCSV);
         List<double[]> coordinates = new ArrayList<>();
+        List<ClusterableLocation> clusterableLocations = new ArrayList<>();
+
+
 
         // Skip the header row and parse coordinates.
         for (int i = 1; i < rawData.size(); i++) {
-            double lat = Double.parseDouble(rawData.get(i)[0]);
-            double lon = Double.parseDouble(rawData.get(i)[1]);
-            coordinates.add(new double[]{lat, lon});
+            String[] row = rawData.get(i);
+            double lat = Double.parseDouble(row[0]);
+            double lon = Double.parseDouble(row[1]);
+            int large = Integer.parseInt(row[2]);
+            int medium = Integer.parseInt(row[3]);
+            int small = Integer.parseInt(row[4]);
+            clusterableLocations.add(new ClusterableLocation(lat, lon, large, medium, small));
         }
 
         // Perform K-means++ clustering.
-        List<CentroidCluster<ClusterableLocation>> clusters = performClustering(coordinates, numClusters);
+        List<CentroidCluster<ClusterableLocation>> clusters = performClustering(clusterableLocations, numClusters);
 
         // Prepare the CSV output with headers.
         List<String[]> clusterData = new ArrayList<>();
@@ -78,7 +87,7 @@ public class KmeansCluster {
 
         // Process each cluster to compute center points and generate cargo data.
         int clusterId = 0;
-        Random random = new Random(); // Random generator for cargo data
+        //Random random = new Random(); // Random generator for cargo data
 
         for (Cluster<ClusterableLocation> cluster : clusters) {
             double sumLat = 0, sumLon = 0;
@@ -86,18 +95,23 @@ public class KmeansCluster {
 
             // Aggregate coordinates and randomly assign cargo.
             for (ClusterableLocation point : cluster.getPoints()) {
-                sumLat += point.getPoint()[0];
-                sumLon += point.getPoint()[1];
+                double[] coords = point.getPoint();
+                sumLat += coords[0];
+                sumLon += coords[1];
 
+                totalLarge += point.getLarge();
+                totalMedium += point.getMedium();
+                totalSmall += point.getSmall();
                 // Randomly generate cargo counts for this cluster
-                totalLarge += random.nextInt(10) + 1; // 1 to 10 large boxes
-                totalMedium += random.nextInt(20) + 1; // 1 to 20 medium boxes
-                totalSmall += random.nextInt(30) + 1; // 1 to 30 small boxes
+//                totalLarge += random.nextInt(10) + 1;
+//                totalMedium += random.nextInt(20) + 1;
+//                totalSmall += random.nextInt(30) + 1;
             }
 
             // Compute cluster center.
-            double avgLat = sumLat / cluster.getPoints().size();
-            double avgLon = sumLon / cluster.getPoints().size();
+            int numPoints = cluster.getPoints().size();
+            double avgLat = sumLat / numPoints;
+            double avgLon = sumLon / numPoints;
 
             // Compute total weight and volume.
             int totalWeight = (totalLarge * Constants.LARGE_BOX_WT) +
