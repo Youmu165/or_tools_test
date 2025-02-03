@@ -10,8 +10,7 @@ public class KmeansCluster {
 
 
     public static List<CentroidCluster<ClusterableLocation>> performClustering(List<ClusterableLocation> clusterableLocations, int numClusters) {
-            KMeansPlusPlusClusterer<ClusterableLocation> clusterer =
-                    new KMeansPlusPlusClusterer<>(numClusters, 100); // 最大迭代100次
+            KMeansPlusPlusClusterer<ClusterableLocation> clusterer = new KMeansPlusPlusClusterer<>(numClusters, 100);//100 rounds
 
             return clusterer.cluster(clusterableLocations);
     }
@@ -87,7 +86,7 @@ public class KmeansCluster {
 
         // Process each cluster to compute center points and generate cargo data.
         int clusterId = 0;
-        //Random random = new Random(); // Random generator for cargo data
+
 
         for (Cluster<ClusterableLocation> cluster : clusters) {
             double sumLat = 0, sumLon = 0;

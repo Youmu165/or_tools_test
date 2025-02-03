@@ -9,6 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Route {
+
+    /**
+     *  Generate the route and save it in csv file
+     * @param clusterCSV The path to cluster data
+     * @param routesCSV The path to route data
+     */
     public static void generateRoutes(String clusterCSV, String routesCSV) {
         List<String[]> clusterData = csvUtil.readCSV(clusterCSV);
         if (clusterData.size() <= 1) {
@@ -16,14 +22,16 @@ public class Route {
             return;
         }
 
+        // Get the target data
         List<double[]> coordinates = new ArrayList<>();
         for (int i = 1; i < clusterData.size(); i++) {
             coordinates.add(new double[]{
-                    Double.parseDouble(clusterData.get(i)[1]),
-                    Double.parseDouble(clusterData.get(i)[2])
+                    Double.parseDouble(clusterData.get(i)[1]),//latitude
+                    Double.parseDouble(clusterData.get(i)[2])//longitude
             });
         }
 
+        //create a distance matrix
         int size = coordinates.size();
         double[][] distanceMatrix = new double[size][size];
         EuclideanDistance distanceCalculator = new EuclideanDistance();
@@ -34,34 +42,45 @@ public class Route {
             }
         }
 
+        //Use or-tools to solve the TSP problem
         List<Integer> optimalRoute = solveTSP(distanceMatrix);
         if (optimalRoute == null) {
             System.err.println("ERROR: No optimal route found.");
             return;
         }
 
+        // Output
         List<String[]> routeData = new ArrayList<>();
         routeData.add(new String[]{"route_id", "route"});
 
+
+        //Divide the entire path into multiple sub-path
         int routeId = 1;
         for (int i = 0; i < optimalRoute.size(); i += 5) {
             StringBuilder routeStr = new StringBuilder();
             for (int j = i; j < Math.min(i + 5, optimalRoute.size()); j++) {
                 if (j > i) routeStr.append("->");
-                routeStr.append(optimalRoute.get(j));
+                routeStr.append(optimalRoute.get(j)); //Add cluster ID
             }
             routeData.add(new String[]{String.valueOf(routeId++), routeStr.toString()});
         }
 
+        // Write the csv file
         csvUtil.writeCSV(routesCSV, routeData);
         System.out.println("Routes computed successfully and saved in " + routesCSV);
     }
 
+    /**
+     * Use or-tools to solve the TSP problem
+     * @param distanceMatrix The distance matrix
+     * @return The route
+     */
     public static List<Integer> solveTSP(double[][] distanceMatrix) {
         Loader.loadNativeLibraries();
         int numNodes = distanceMatrix.length;
         RoutingIndexManager manager = new RoutingIndexManager(numNodes, 1, 0);
         RoutingModel routing = new RoutingModel(manager);
+
 
         int transitCallbackIndex = routing.registerTransitCallback((long fromIndex, long toIndex) -> {
             int fromNode = manager.indexToNode(fromIndex);
