@@ -111,3 +111,14 @@ public class Route {
         return route;
     }
 }
+
+
+/*
+ *
+ *     Maybe we can simply divide the route to five parts so that we no longer to consider the vehicle assigning problem
+ *        /
+      ∧ _ ∧　　　　∧ _ ∧  Good Idea
+ 　　　(　･∀･)　　d(ﾟдﾟ　)  /
+ -------〇--〇--------〇-----
+
+ */
